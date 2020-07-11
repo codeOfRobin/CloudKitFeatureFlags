@@ -77,7 +77,7 @@ class FeatureFlagCoordinator {
 			guard let ff = dict[name] else {
 				return false
 			}
-
+//TODO: figure out what to do here
 			return FlaggingLogic.shouldBeActive(hash: FlaggingLogic.userFeatureFlagHash(flagUUID: ff.uuid, userUUID: userData.featureFlaggingID), rollout: ff.rollout)
 		}.eraseToAnyPublisher()
 	}
