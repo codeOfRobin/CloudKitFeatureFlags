@@ -5,12 +5,13 @@ import PackageDescription
 
 let package = Package(
     name: "CloudKitFeatureFlags",
-    products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
-        .library(
-            name: "CloudKitFeatureFlags",
-            targets: ["CloudKitFeatureFlags"]),
-    ],
+	platforms: [.iOS(.v13), .macOS(.v10_15)],
+	products: [
+		// Products define the executables and libraries a package produces, and make them visible to other packages.
+		.library(
+			name: "CloudKitFeatureFlags",
+			targets: ["CloudKitFeatureFlags"])
+	],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),

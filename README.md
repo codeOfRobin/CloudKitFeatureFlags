@@ -1,3 +1,3 @@
 # CloudKitFeatureFlags
 
-A description of this package.
+Broad ideas here: https://www.craft.do/s/VIzO95A9chLeoW
