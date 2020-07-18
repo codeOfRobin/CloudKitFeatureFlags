@@ -92,7 +92,7 @@ final class FeatureFlagCoordinatorTests: XCTestCase {
 					let testContainer = TestContainer(database: testDatabase)
 					testDatabase.delegate = delegate
 					testContainer.delegate = delegate
-					let coordinator = FeatureFlagCoordinator(container: testContainer)
+					let coordinator = CloudKitFeatureFlagsRepository(container: testContainer)
 					var calculatedValue: Bool!
 					let dispatchSemaphore = DispatchSemaphore(value: 0)
 					_ = coordinator.featureEnabled(name: featureFlag.name).sink { (_) in } receiveValue: { (value) in

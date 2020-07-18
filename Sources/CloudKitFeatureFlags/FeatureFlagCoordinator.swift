@@ -9,7 +9,7 @@ import Foundation
 import CloudKit
 import Combine
 
-class FeatureFlagCoordinator {
+class CloudKitFeatureFlagsRepository {
 
 	let container: Container
 	//TODO: make this a store that's updated from CK subscription
