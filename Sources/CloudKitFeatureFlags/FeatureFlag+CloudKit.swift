@@ -12,7 +12,7 @@ extension FeatureFlag {
 	init?(record: CKRecord) {
 		guard let uuidString = record[.featureFlagUUID] as? String,
 			  let uuid = UUID(uuidString: uuidString),
-			  let rollout = record[.rollout] as? Float,
+			  let rollout = record[.rollout] as? Double,
 			  let value = record[.value] as? Bool
 		else {
 			return nil
@@ -20,7 +20,7 @@ extension FeatureFlag {
 
 		self.name = record.recordID.recordName
 		self.uuid = uuid
-		self.rollout = rollout
+		self.rollout = Float(rollout)
 		self.value = value
 	}
 
