@@ -25,7 +25,7 @@ extension FeatureFlag {
 	}
 
 	//TODO: Fix
-	func convertToRecord() -> CKRecord {
+	public func convertToRecord() -> CKRecord {
 		let record = CKRecord(recordType: "FeatureFlag", recordID: .init(recordName: self.name))
 		record[.rollout] = self.rollout
 		record[.value] = self.value

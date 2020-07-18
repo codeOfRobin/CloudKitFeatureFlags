@@ -14,13 +14,13 @@ enum FeatureFlagKey: String {
 	case value
 }
 
-struct FeatureFlag {
+public struct FeatureFlag {
 	let name: String
 	let uuid: UUID
 	let rollout: Float
 	let value: Bool
 
-	init(name: String, uuid: UUID, rollout: Float, value: Bool) {
+	public init(name: String, uuid: UUID, rollout: Float, value: Bool) {
 		self.name = name
 		self.uuid = uuid
 		self.rollout = rollout
