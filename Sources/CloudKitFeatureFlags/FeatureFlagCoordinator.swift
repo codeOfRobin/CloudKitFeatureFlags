@@ -11,18 +11,12 @@ import Combine
 
 class FeatureFlagCoordinator {
 
-	let container: CKContainer
+	let container: Container
 	//TODO: make this a store that's updated from CK subscription
-	let featureFlagsFuture: Future<[String: FeatureFlag], Error>
-	let userDataFuture: Future<AdditionalUserData, Error>
+	private let featureFlagsFuture: Future<[String: FeatureFlag], Error>
+	private let userDataFuture: Future<AdditionalUserData, Error>
 
-	init(container: CKContainer, featureFlagsFuture: Future<[String : FeatureFlag], Error>, userDataFuture: Future<AdditionalUserData, Error>) {
-		self.container = container
-		self.featureFlagsFuture = featureFlagsFuture
-		self.userDataFuture = userDataFuture
-	}
-
-	init(container: CKContainer) {
+	init(container: Container) {
 		self.container = container
 		self.userDataFuture = Future<AdditionalUserData, Error> { (promise) in
 			container.fetchUserRecordID { (recordID, error) in
@@ -31,7 +25,7 @@ class FeatureFlagCoordinator {
 					promise(.failure(error!))
 					return
 				}
-				container.publicCloudDatabase.fetch(withRecordID: recordID) { (record, error) in
+				container.featureFlaggingDatabase.fetch(withRecordID: recordID) { (record, error) in
 					guard let record = record else {
 						//TODO: Fix
 						promise(.failure(error!))
@@ -40,7 +34,7 @@ class FeatureFlagCoordinator {
 					guard let data = AdditionalUserData(record: record) else {
 						/// User doesn't have an ID set
 						record[.userFeatureFlaggingID] = UUID().uuidString
-						container.publicCloudDatabase.save(record) { (record, error) in
+						container.featureFlaggingDatabase.save(record) { (record, error) in
 							guard let record = record, let data = AdditionalUserData(record: record) else {
 								//TODO: Fix
 								promise(.failure(error!))
@@ -58,7 +52,7 @@ class FeatureFlagCoordinator {
 		self.featureFlagsFuture = Future{ (promise) in
 			let query = CKQuery(recordType: "FeatureFlag", predicate: NSPredicate(value: true))
 
-			container.publicCloudDatabase.perform(query, inZoneWith: nil) { (records, error) in
+			container.featureFlaggingDatabase.perform(query, inZoneWith: nil) { (records, error) in
 				guard let records = records else {
 					//TODO: Fix
 					promise(.failure(error!))
