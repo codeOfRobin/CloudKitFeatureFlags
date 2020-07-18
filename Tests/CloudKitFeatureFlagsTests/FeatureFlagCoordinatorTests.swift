@@ -102,7 +102,7 @@ final class FeatureFlagCoordinatorTests: XCTestCase {
 					dispatchSemaphore.wait()
 					return calculatedValue
 				}.filter { $0 }.count
-			XCTAssertEqual(Float(count), Float(userPopulation) * rollout, accuracy: 0.3  * Float(userPopulation) / 100.0)
+			XCTAssertEqual(Float(count), Float(userPopulation) * rollout, accuracy: 0.5  * Float(userPopulation) / 100.0)
 		}
 	}
 
