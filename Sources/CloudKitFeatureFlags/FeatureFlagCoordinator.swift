@@ -16,7 +16,7 @@ public class CloudKitFeatureFlagsRepository {
 	private let featureFlagsFuture: Future<[String: FeatureFlag], Error>
 	private let userDataFuture: Future<AdditionalUserData, Error>
 
-	init(container: Container) {
+	public init(container: Container) {
 		self.container = container
 		self.userDataFuture = Future<AdditionalUserData, Error> { (promise) in
 			container.fetchUserRecordID { (recordID, error) in
@@ -66,7 +66,7 @@ public class CloudKitFeatureFlagsRepository {
 		}
 	}
 
-	@discardableResult func featureEnabled(name: String) -> AnyPublisher<Bool, Error> {
+	@discardableResult public func featureEnabled(name: String) -> AnyPublisher<Bool, Error> {
 		Publishers.CombineLatest(featureFlagsFuture, userDataFuture).map { (dict, userData) -> Bool in
 			guard let ff = dict[name] else {
 				return false
