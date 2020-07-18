@@ -8,24 +8,22 @@
 import Foundation
 
 enum FeatureFlagKey: String {
-	case uuid
+	/// "uuid" appears to be reserved
+	case featureFlagUUID
 	case rollout
 	case value
-	case defaultValue
 }
 
 struct FeatureFlag {
 	let name: String
 	let uuid: UUID
 	let rollout: Float
-	let defaultValue: Bool
 	let value: Bool
 
-	init(name: String, uuid: UUID, rollout: Float, defaultValue: Bool, value: Bool) {
+	init(name: String, uuid: UUID, rollout: Float, value: Bool) {
 		self.name = name
 		self.uuid = uuid
 		self.rollout = rollout
-		self.defaultValue = defaultValue
 		self.value = value
 	}
 }

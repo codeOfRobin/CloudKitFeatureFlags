@@ -10,11 +10,10 @@ import CloudKit
 
 extension FeatureFlag {
 	init?(record: CKRecord) {
-		guard let uuidString = record[.uuid] as? String,
+		guard let uuidString = record[.featureFlagUUID] as? String,
 			  let uuid = UUID(uuidString: uuidString),
 			  let rollout = record[.rollout] as? Float,
-			  let value = record[.value] as? Bool,
-			  let defaultValue = record[.defaultValue] as? Bool
+			  let value = record[.value] as? Bool
 		else {
 			return nil
 		}
@@ -23,16 +22,15 @@ extension FeatureFlag {
 		self.uuid = uuid
 		self.rollout = rollout
 		self.value = value
-		self.defaultValue = defaultValue
 	}
 
 	//TODO: Fix
-	func recordToCreate() -> (record: CKRecord, name: String) {
-		let record = CKRecord(recordType: "FeatureFlag")
+	func convertToRecord() -> CKRecord {
+		let record = CKRecord(recordType: "FeatureFlag", recordID: .init(recordName: self.name))
 		record[.rollout] = self.rollout
 		record[.value] = self.value
-		record[.uuid] = self.uuid
-		return (record, self.name)
+		record[.featureFlagUUID] = self.uuid.uuidString
+		return record
 	}
 }
 

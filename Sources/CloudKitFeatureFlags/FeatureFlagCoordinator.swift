@@ -49,7 +49,7 @@ class FeatureFlagCoordinator {
 			}
 		}
 
-		self.featureFlagsFuture = Future{ (promise) in
+		self.featureFlagsFuture = Future { (promise) in
 			let query = CKQuery(recordType: "FeatureFlag", predicate: NSPredicate(value: true))
 
 			container.featureFlaggingDatabase.perform(query, inZoneWith: nil) { (records, error) in
@@ -66,12 +66,12 @@ class FeatureFlagCoordinator {
 		}
 	}
 
-	func isSomeFeatureEnabled(name: String) -> AnyPublisher<Bool, Error> {
+	@discardableResult func featureEnabled(name: String) -> AnyPublisher<Bool, Error> {
 		Publishers.CombineLatest(featureFlagsFuture, userDataFuture).map { (dict, userData) -> Bool in
 			guard let ff = dict[name] else {
 				return false
 			}
-//TODO: figure out what to do here
+			//TODO: figure out what to do here
 			return FlaggingLogic.shouldBeActive(hash: FlaggingLogic.userFeatureFlagHash(flagUUID: ff.uuid, userUUID: userData.featureFlaggingID), rollout: ff.rollout)
 		}.eraseToAnyPublisher()
 	}
