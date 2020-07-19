@@ -8,6 +8,7 @@
 - A unique statistical approach, we don't need to store a large number of records or do lots of operations to rollback/deploy feature flags.
 - Most operations typically involve editing one row in your CK Public database.
 - All operations take place via the public databse, so no worrying about users running out of iCloud space.
+- Tests to ensure rollouts are reasonably accurate (there's tests to ensure rollouts are at least 0.5% accurate on user populations of 100k users, and 1% accurate on 10k users)
 - (Coming soon) Release features to specific allow-listed users - such as app reviewers
 - (Coming Soon) Admin interface to create and deploy feature flags
 - (Coming Soon) Gate feature flags to avoid leaking features currently in development, may require a CloudKit Schema migration
