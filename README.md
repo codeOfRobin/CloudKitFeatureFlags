@@ -29,7 +29,7 @@ Add to your project via Swift Package manager, package URL: `https://github.com/
 - In your app, install the package and create an instance of `CloudKitFeatureFlagsRepository`
 
 ```swift
-let container = CKContainer(identifier: "<your container goes here, please make sure it's correctly set up in the "Signing & Capabilities section in Xcode>")
+let container = CKContainer(identifier: "your container goes here, please make sure it's correctly set up in the "Signing and Capabilities section in Xcode")
 
 lazy var featureFlags = CloudKitFeatureFlagsRepository(container: container)
 
