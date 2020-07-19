@@ -15,3 +15,34 @@
 Broad ideas and implementation ideas here: https://www.craft.do/s/VIzO95A9chLeoW
 
 Test application here: https://github.com/codeOfRobin/TestingCloudKitFeatureFlags (requires setting up a CloudKit container and changing the signing capabilities with your  Developer account)
+
+# Guide
+
+## Installation
+
+Add to your project via Swift Package manager, package URL: `https://github.com/codeOfRobin/CloudKitFeatureFlags`. Since we're still early along, it's recommended to use the `main` branch.
+
+## Usage
+
+- Create feature flags somehow You can use the test app, or simply do it via the CloudKit dashboard. This is roughly the schema you're looking for (I'm working on making this experience better, feel free to open an issue if you need help!) ![](https://i.imgur.com/Zj6MmGR.png)
+- In your app, install the package and create an instance of `CloudKitFeatureFlagsRepository`
+
+```swift
+let container = CKContainer(identifier: "<your container goes here, please make sure it's correctly set up in the "Signing & Capabilities section in Xcode>")
+
+lazy var featureFlags = CloudKitFeatureFlagsRepository(container: container)
+
+/// For Combine reasons
+var cancellables = Set<AnyCancellable>()
+```
+
+- Use the `featureFlagsRepository` to query the status of a feature flag. In the future ([coming soon!](https://github.com/codeOfRobin/CloudKitFeatureFlags/issues/1)) it'll update realtime via a `CKSubscription`
+
+```swift
+featureFlags.featureEnabled(name: "some_feature_flag").sink(receiveCompletion: { (_) in }) { (value) in
+      /// use `value` to change your UI imperatively, or bind the publisher directly!
+			print(value)
+		}.store(in: &cancellables)
+```
+
+- And that's it! You can control feature flags and rollouts directly from the CloudKit dashboard 🎉🎉🎉
