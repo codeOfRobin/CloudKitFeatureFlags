@@ -95,10 +95,11 @@ final class FeatureFlagCoordinatorTests: XCTestCase {
 					let coordinator = CloudKitFeatureFlagsRepository(container: testContainer)
 					var calculatedValue: Bool!
 					let dispatchSemaphore = DispatchSemaphore(value: 0)
-					_ = coordinator.featureEnabled(name: featureFlag.name).sink { (_) in } receiveValue: { (value) in
-						calculatedValue = value
-						dispatchSemaphore.signal()
-					}
+					_ = coordinator.featureEnabled(name: featureFlag.name)
+						.sink(receiveCompletion: { (_) in }, receiveValue: { (value) in
+							calculatedValue = value
+							dispatchSemaphore.signal()
+						})
 					dispatchSemaphore.wait()
 					return calculatedValue
 				}.filter { $0 }.count

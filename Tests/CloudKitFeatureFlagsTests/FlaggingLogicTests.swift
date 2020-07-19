@@ -20,7 +20,7 @@ final class FlaggingLogicTests: XCTestCase {
 			let included = users.lazy.map { (user) in
 				FlaggingLogic.shouldBeActive(hash: FlaggingLogic.userFeatureFlagHash(flagUUID: featureFlagID, userUUID: user), rollout: rollout)
 			}.filter { $0 }.count
-			XCTAssertEqual(population * rollout, Float(included), accuracy: 0.3 * population / 100.0)
+			XCTAssertEqual(population * rollout, Float(included), accuracy: 0.5 * population / 100.0)
 		}
 	}
 
