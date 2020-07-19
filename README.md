@@ -41,9 +41,9 @@ var cancellables = Set<AnyCancellable>()
 
 ```swift
 featureFlags.featureEnabled(name: "some_feature_flag").sink(receiveCompletion: { (_) in }) { (value) in
-      /// use `value` to change your UI imperatively, or bind the publisher directly!
-			print(value)
-		}.store(in: &cancellables)
+  /// use `value` to change your UI imperatively, or bind the publisher directly!
+  print(value)
+}.store(in: &cancellables)
 ```
 
 - And that's it! You can control feature flags and rollouts directly from the CloudKit dashboard 🎉🎉🎉
