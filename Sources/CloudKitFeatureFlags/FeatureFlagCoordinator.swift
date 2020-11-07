@@ -13,7 +13,7 @@ public class CloudKitFeatureFlagsRepository {
 
 	let container: Container
 	//TODO: make this a store that's updated from CK subscription
-	private let featureFlagsFuture: Future<[String: FeatureFlag], Error>
+	let featureFlagsFuture: Future<[String: FeatureFlag], Error>
 	private let userDataFuture: Future<AdditionalUserData, Error>
 
 	public init(container: Container) {
