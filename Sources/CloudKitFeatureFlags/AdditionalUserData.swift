@@ -12,8 +12,8 @@ enum AdditionalUserDataKeys: String {
 	case userFeatureFlaggingID
 }
 
-struct AdditionalUserData {
-	let featureFlaggingID: UUID
+public struct AdditionalUserData {
+	public let featureFlaggingID: UUID
 }
 
 extension AdditionalUserData {
