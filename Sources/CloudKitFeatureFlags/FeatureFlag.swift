@@ -15,10 +15,10 @@ enum FeatureFlagKey: String {
 }
 
 public struct FeatureFlag {
-	let name: String
-	let uuid: UUID
-	let rollout: Float
-	let value: Bool
+	public let name: String
+	public let uuid: UUID
+	public let rollout: Float
+	public let value: Bool
 
 	public init(name: String, uuid: UUID, rollout: Float, value: Bool) {
 		self.name = name
