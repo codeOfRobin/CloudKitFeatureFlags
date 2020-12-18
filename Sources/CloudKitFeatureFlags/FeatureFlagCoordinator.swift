@@ -76,3 +76,20 @@ public class CloudKitFeatureFlagsRepository {
 		}.eraseToAnyPublisher()
 	}
 }
+
+
+extension CloudKitFeatureFlagsRepository {
+    struct VerificationFunctions {
+        private var base: CloudKitFeatureFlagsRepository
+        fileprivate init(_ base: CloudKitFeatureFlagsRepository) { self.base = base }
+            
+        func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
+            return base.getDebuggingData()
+        }
+    }
+    
+    var DEBUGGING_AND_VERIFICATION: VerificationFunctions { .init(self) }
+    private func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
+        return Publishers.CombineLatest(featureFlagsFuture, userDataFuture).eraseToAnyPublisher()
+    }
+}
