@@ -76,3 +76,44 @@ public class CloudKitFeatureFlagsRepository {
 		}.eraseToAnyPublisher()
 	}
 }
+
+
+extension CloudKitFeatureFlagsRepository {
+    struct VerificationFunctions {
+        private var base: CloudKitFeatureFlagsRepository
+        fileprivate init(_ base: CloudKitFeatureFlagsRepository) { self.base = base }
+            
+        func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
+            return base.getDebuggingData()
+        }
+        
+        public func sendDataToVerificationServer(url: URL) -> AnyPublisher<(data: Data, response: URLResponse), Error> {
+            let requests = getDebuggingData()
+                .tryMap { (flags, userData) -> URLRequest in
+                    var bodyObj: [String: Any] = [
+                        "userID": userData.featureFlaggingID.uuidString
+                    ]
+                    for (key, value) in flags {
+                        bodyObj[key] = value.value
+                    }
+                    let data = try JSONSerialization.data(withJSONObject: bodyObj, options: [])
+                    
+                    var request = URLRequest(url: url)
+                    request.httpBody = data
+                    request.httpMethod = "POST"
+                    return request
+                }
+                .map({ (request) in
+                    return URLSession.shared.dataTaskPublisher(for: request).mapError{ $0 as Error }
+                })
+            
+            return Publishers.SwitchToLatest(upstream: requests).eraseToAnyPublisher()
+            
+        }
+    }
+    
+    var DEBUGGING_AND_VERIFICATION: VerificationFunctions { .init(self) }
+    private func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
+        return Publishers.CombineLatest(featureFlagsFuture, userDataFuture).eraseToAnyPublisher()
+    }
+}
