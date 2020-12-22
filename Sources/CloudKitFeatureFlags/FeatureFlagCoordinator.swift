@@ -8,6 +8,7 @@
 import Foundation
 import CloudKit
 import Combine
+import CryptoKit
 
 public class CloudKitFeatureFlagsRepository {
 
@@ -79,9 +80,13 @@ public class CloudKitFeatureFlagsRepository {
 
 
 extension CloudKitFeatureFlagsRepository {
-    struct VerificationFunctions {
+    public struct VerificationFunctions {
         private var base: CloudKitFeatureFlagsRepository
-        fileprivate init(_ base: CloudKitFeatureFlagsRepository) { self.base = base }
+        private var session: URLSession
+        init(_ base: CloudKitFeatureFlagsRepository, session: URLSession = .shared) {
+            self.base = base
+            self.session = session
+        }
             
         func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
             return base.getDebuggingData()
@@ -89,9 +94,13 @@ extension CloudKitFeatureFlagsRepository {
         
         public func sendDataToVerificationServer(url: URL) -> AnyPublisher<(data: Data, response: URLResponse), Error> {
             let requests = getDebuggingData()
-                .tryMap { (flags, userData) -> URLRequest in
+                .tryMap { (flags, userData) -> URLRequest? in
+                    guard let userIDData = userData.featureFlaggingID.uuidString.data(using: .utf8) else {
+                        return nil
+                    }
+                    let hash = SHA256.hash(data: userIDData)
                     var bodyObj: [String: Any] = [
-                        "userID": userData.featureFlaggingID.uuidString
+                        "userID": hash
                     ]
                     for (key, value) in flags {
                         bodyObj[key] = value.value
@@ -102,17 +111,16 @@ extension CloudKitFeatureFlagsRepository {
                     request.httpBody = data
                     request.httpMethod = "POST"
                     return request
-                }
+                }.compactMap { $0 }
                 .map({ (request) in
                     return URLSession.shared.dataTaskPublisher(for: request).mapError{ $0 as Error }
                 })
             
             return Publishers.SwitchToLatest(upstream: requests).eraseToAnyPublisher()
-            
         }
     }
     
-    var DEBUGGING_AND_VERIFICATION: VerificationFunctions { .init(self) }
+    public var DEBUGGING_AND_VERIFICATION: VerificationFunctions { .init(self) }
     private func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
         return Publishers.CombineLatest(featureFlagsFuture, userDataFuture).eraseToAnyPublisher()
     }
