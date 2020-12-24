@@ -100,7 +100,7 @@ extension CloudKitFeatureFlagsRepository {
                     }
                     let hash = SHA256.hash(data: userIDData)
                     var bodyObj: [String: Any] = [
-                        "userID": hash
+                        "userID": hash.compactMap { String(format: "%02x", $0) }.joined()
                     ]
                     for (key, value) in flags {
                         bodyObj[key] = value.value
