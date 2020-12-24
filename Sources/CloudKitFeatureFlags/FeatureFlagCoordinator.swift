@@ -100,7 +100,7 @@ extension CloudKitFeatureFlagsRepository {
                     }
                     let hash = SHA256.hash(data: userIDData)
                     var bodyObj: [String: Any] = [
-                        "userID": hash
+                        "userID": hash.compactMap { String(format: "%02x", $0) }.joined()
                     ]
                     for (key, value) in flags {
                         bodyObj[key] = value.value
@@ -108,6 +108,7 @@ extension CloudKitFeatureFlagsRepository {
                     let data = try JSONSerialization.data(withJSONObject: bodyObj, options: [])
                     
                     var request = URLRequest(url: url)
+                    request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
                     request.httpBody = data
                     request.httpMethod = "POST"
                     return request
