@@ -108,6 +108,7 @@ extension CloudKitFeatureFlagsRepository {
                     let data = try JSONSerialization.data(withJSONObject: bodyObj, options: [])
                     
                     var request = URLRequest(url: url)
+                    request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
                     request.httpBody = data
                     request.httpMethod = "POST"
                     return request
