@@ -116,10 +116,10 @@ final class FeatureFlagCoordinatorTests: XCTestCase {
         }
 
         for flag in featureFlags {
-            /// 1% accuracy
+            /// 0.5% accuracy
             let measuredRollout = Float(collectedResults[flag.name]!) / (Float(userPopulation))
             print(measuredRollout)
-            XCTAssertEqual(measuredRollout, flag.rollout, accuracy: 0.003)
+            XCTAssertEqual(measuredRollout, flag.rollout, accuracy: 0.005)
         }
         
         
