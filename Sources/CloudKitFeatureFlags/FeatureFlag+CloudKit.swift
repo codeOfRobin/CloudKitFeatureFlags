@@ -18,7 +18,7 @@ extension FeatureFlag {
 			return nil
 		}
 
-		self.name = record.recordID.recordName
+        self.name = FeatureFlag.Name(rawValue: record.recordID.recordName)
 		self.uuid = uuid
 		self.rollout = Float(rollout)
 		self.value = value
@@ -26,7 +26,7 @@ extension FeatureFlag {
 
 	//TODO: Fix
 	public func convertToRecord() -> CKRecord {
-		let record = CKRecord(recordType: "FeatureFlag", recordID: .init(recordName: self.name))
+        let record = CKRecord(recordType: "FeatureFlag", recordID: .init(recordName: self.name.rawValue))
 		record[.rollout] = self.rollout
 		record[.value] = self.value
 		record[.featureFlagUUID] = self.uuid.uuidString

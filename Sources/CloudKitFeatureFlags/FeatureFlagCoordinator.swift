@@ -88,7 +88,7 @@ extension CloudKitFeatureFlagsRepository {
             self.session = session
         }
             
-        func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
+        func getDebuggingData() -> AnyPublisher<([FeatureFlag.Name: FeatureFlag], AdditionalUserData),Error> {
             return base.getDebuggingData()
         }
         
@@ -103,7 +103,7 @@ extension CloudKitFeatureFlagsRepository {
                         "userID": hash.compactMap { String(format: "%02x", $0) }.joined()
                     ]
                     for (key, value) in flags {
-                        bodyObj[key] = value.value
+                        bodyObj[key.rawValue] = value.value
                     }
                     let data = try JSONSerialization.data(withJSONObject: bodyObj, options: [])
                     

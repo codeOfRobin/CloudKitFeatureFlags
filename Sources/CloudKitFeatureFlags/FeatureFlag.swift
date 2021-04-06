@@ -15,12 +15,18 @@ enum FeatureFlagKey: String {
 }
 
 public struct FeatureFlag {
-	let name: String
+    
+    public struct Name: RawRepresentable, Hashable, Equatable {
+        public let rawValue: String
+        public init(rawValue: String) { self.rawValue = rawValue }
+    }
+    
+    let name: FeatureFlag.Name
 	let uuid: UUID
 	let rollout: Float
 	let value: Bool
 
-	public init(name: String, uuid: UUID, rollout: Float, value: Bool) {
+	public init(name: Name, uuid: UUID, rollout: Float, value: Bool) {
 		self.name = name
 		self.uuid = uuid
 		self.rollout = rollout
