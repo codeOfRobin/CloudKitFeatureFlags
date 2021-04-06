@@ -14,7 +14,7 @@ public class CloudKitFeatureFlagsRepository {
 
 	let container: Container
 	//TODO: make this a store that's updated from CK subscription
-	private let featureFlagsFuture: Future<[String: FeatureFlag], Error>
+    private let featureFlagsFuture: Future<[FeatureFlag.Name: FeatureFlag], Error>
 	private let userDataFuture: Future<AdditionalUserData, Error>
 
 	public init(container: Container) {
@@ -69,7 +69,7 @@ public class CloudKitFeatureFlagsRepository {
 
 	@discardableResult public func featureEnabled(name: String) -> AnyPublisher<Bool, Error> {
 		Publishers.CombineLatest(featureFlagsFuture, userDataFuture).map { (dict, userData) -> Bool in
-			guard let ff = dict[name] else {
+            guard let ff = dict[FeatureFlag.Name(rawValue: name)] else {
 				return false
 			}
 			//TODO: figure out what to do here
@@ -88,7 +88,7 @@ extension CloudKitFeatureFlagsRepository {
             self.session = session
         }
             
-        func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
+        func getDebuggingData() -> AnyPublisher<([FeatureFlag.Name: FeatureFlag], AdditionalUserData),Error> {
             return base.getDebuggingData()
         }
         
@@ -103,7 +103,7 @@ extension CloudKitFeatureFlagsRepository {
                         "userID": hash.compactMap { String(format: "%02x", $0) }.joined()
                     ]
                     for (key, value) in flags {
-                        bodyObj[key] = value.value
+                        bodyObj[key.rawValue] = value.value
                     }
                     let data = try JSONSerialization.data(withJSONObject: bodyObj, options: [])
                     
@@ -122,7 +122,7 @@ extension CloudKitFeatureFlagsRepository {
     }
     
     public var DEBUGGING_AND_VERIFICATION: VerificationFunctions { .init(self) }
-    private func getDebuggingData() -> AnyPublisher<([String: FeatureFlag], AdditionalUserData),Error> {
+    private func getDebuggingData() -> AnyPublisher<([FeatureFlag.Name: FeatureFlag], AdditionalUserData),Error> {
         return Publishers.CombineLatest(featureFlagsFuture, userDataFuture).eraseToAnyPublisher()
     }
 }
