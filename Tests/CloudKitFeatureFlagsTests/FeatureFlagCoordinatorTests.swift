@@ -15,7 +15,7 @@ protocol UserDataDelegate: class {
 	func fetch(withRecordID recordID: CKRecord.ID, completionHandler: @escaping (CKRecord?, Error?) -> Void)
 }
 
-class TestDataDelegate: UserDataDelegate {
+class TestUserDataDelegate: UserDataDelegate {
 
 	let userRecordName: UUID
 	let userFeatureFlagID: UUID
@@ -39,14 +39,14 @@ class TestDataDelegate: UserDataDelegate {
 class TestContainer: Container {
 
 	let database: Database
-	weak var delegate: UserDataDelegate?
+	weak var userDataDelegate: UserDataDelegate?
 
 	internal init(database: Database) {
 		self.database = database
 	}
 
 	func fetchUserRecordID(completionHandler: @escaping (CKRecord.ID?, Error?) -> Void) {
-		delegate?.fetchUserRecordID(completionHandler: completionHandler)
+		userDataDelegate?.fetchUserRecordID(completionHandler: completionHandler)
 	}
 
 	var featureFlaggingDatabase: Database {
@@ -81,30 +81,48 @@ final class FeatureFlagCoordinatorTests: XCTestCase {
 
 	func testStubbedCoordinator() {
 		let userPopulation = 100_000
+        
+        let rollouts = (0...10).map { i in Float(i)/10.0 }
+        let featureFlags = rollouts.map { rollout in FeatureFlag(name: FeatureFlag.Name(rawValue: UUID().uuidString), uuid: UUID(), rollout: rollout, value: true) }
+        let testDatabase = TestDatabase(featureFlags: featureFlags)
+        let testContainer = TestContainer(database: testDatabase)
+        let userProxies = (0..<userPopulation)
+            .map { _ in TestUserDataDelegate(userRecordName: UUID(), userFeatureFlagID: UUID()) }
+        
+        func switchUser(in container: TestContainer, with userDataDelegate: UserDataDelegate) -> TestContainer {
+            container.userDataDelegate = userDataDelegate
+            (container.database as? TestDatabase)?.delegate = userDataDelegate
+            return container
+        }
+        
+        func simulate(flags: [FeatureFlag], in repo: CloudKitFeatureFlagsRepository, currentResultSet: [FeatureFlag.Name: Int]) -> [FeatureFlag.Name: Int] {
+            return flags.reduce(into: currentResultSet) { (currentResults, flag) in
+                var calculatedValue: Bool!
+                let dispatchSemaphore = DispatchSemaphore(value: 0)
+                _ = repo.featureEnabled(name: flag.name.rawValue)
+                    .sink(receiveCompletion: { (_) in }, receiveValue: { (value) in
+                        calculatedValue = value
+                        dispatchSemaphore.signal()
+                    })
+                dispatchSemaphore.wait()
+                currentResults[flag.name, default: 0] += (calculatedValue == true) ? 1 : 0
+            }
+        }
+        
+        let collectedResults = userProxies.reduce([FeatureFlag.Name: Int]()) { (calculation, userProxy) in
+            let testContainer = switchUser(in: testContainer, with: userProxy)
+            let coordinator = CloudKitFeatureFlagsRepository(container: testContainer)
+            return simulate(flags: featureFlags, in: coordinator, currentResultSet: calculation)
+        }
 
-		for i in 0...10 {
-			let rollout = Float(i)/10.0
-			let featureFlag = FeatureFlag(name: UUID().uuidString, uuid: UUID(), rollout: rollout, value: true)
-			let count = (0..<userPopulation)
-				.map { _ in TestDataDelegate(userRecordName: UUID(), userFeatureFlagID: UUID()) }
-				.map { delegate in
-					let testDatabase = TestDatabase(featureFlags: [featureFlag])
-					let testContainer = TestContainer(database: testDatabase)
-					testDatabase.delegate = delegate
-					testContainer.delegate = delegate
-					let coordinator = CloudKitFeatureFlagsRepository(container: testContainer)
-					var calculatedValue: Bool!
-					let dispatchSemaphore = DispatchSemaphore(value: 0)
-					_ = coordinator.featureEnabled(name: featureFlag.name)
-						.sink(receiveCompletion: { (_) in }, receiveValue: { (value) in
-							calculatedValue = value
-							dispatchSemaphore.signal()
-						})
-					dispatchSemaphore.wait()
-					return calculatedValue
-				}.filter { $0 }.count
-			XCTAssertEqual(Float(count), Float(userPopulation) * rollout, accuracy: 0.5  * Float(userPopulation) / 100.0)
-		}
+        for flag in featureFlags {
+            /// 1% accuracy
+            let measuredRollout = Float(collectedResults[flag.name]!) / (Float(userPopulation))
+            print(measuredRollout)
+            XCTAssertEqual(measuredRollout, flag.rollout, accuracy: 0.003)
+        }
+        
+        
 	}
 
 	static var allTests = [
