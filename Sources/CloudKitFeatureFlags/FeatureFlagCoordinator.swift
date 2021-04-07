@@ -69,31 +69,22 @@ public class CloudKitFeatureFlagsRepository {
 		}
 	}
 
-	@discardableResult public func featureEnabled(name: String) -> AnyPublisher<Bool, Error> {
-        
-        let cacheHit = Future<Bool?, Never>.init { [weak self] (promise) in
-            promise(.success(self?.storage.get(name: name)))
-        }
-        
+	@discardableResult public func featureEnabled(name: String) -> AnyPublisher<Bool, Never> {
         let convertedName = FeatureFlag.Name(rawValue: name)
-        
         let cloudKitHit = Publishers.CombineLatest(featureFlagsFuture, userDataFuture).map { (dict, userData) -> Bool in
             guard let ff = dict[convertedName] else {
                 return false
             }
-            //TODO: figure out what to do here
             return FlaggingLogic.shouldBeActive(hash: FlaggingLogic.userFeatureFlagHash(flagUUID: ff.uuid, userUUID: userData.featureFlaggingID), rollout: ff.rollout)
-        }.eraseToAnyPublisher()
+        }.replaceError(with: false).eraseToAnyPublisher()
         
-        //TODO: figure out what's a better option than flatMap
-        return cacheHit.flatMap({ (cachedValue) -> AnyPublisher<Bool, Error> in
-            guard let value = cachedValue else {
+        return {
+            guard let cachedValue = self.storage.get(name: name) else {
                 return cloudKitHit
             }
-            return Future { (promise) in
-                promise(.success(value))
-            }.eraseToAnyPublisher()
-        }).eraseToAnyPublisher()
+            
+            return Just(cachedValue).eraseToAnyPublisher()
+        }()
 	}
 }
 
