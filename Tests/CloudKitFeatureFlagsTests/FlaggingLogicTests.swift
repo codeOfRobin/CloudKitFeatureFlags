@@ -10,7 +10,7 @@ import XCTest
 
 final class FlaggingLogicTests: XCTestCase {
 
-	func testIncrementalRollouTo100Percent() {
+	func testIncrementalRolloutTo100Percent() {
 		let population: Float = 100_000
 		let users = (0..<Int(population)).map { _ in UUID() }
 
@@ -25,7 +25,7 @@ final class FlaggingLogicTests: XCTestCase {
 	}
 
 	static var allTests = [
-		("testIncrementalRollouTo100Percent", testIncrementalRollouTo100Percent),
+		("testIncrementalRolloutTo100Percent", testIncrementalRolloutTo100Percent),
 	]
 	
 }
