@@ -13,14 +13,12 @@ import CryptoKit
 public class CloudKitFeatureFlagsRepository {
 
 	let container: Container
-    let storage: FeatureFlagStorage
 	//TODO: make this a store that's updated from CK subscription
     private let featureFlagsFuture: Future<[FeatureFlag.Name: FeatureFlag], Error>
 	private let userDataFuture: Future<AdditionalUserData, Error>
 
-    public init(container: Container, storage: FeatureFlagStorage = UserDefaultsFeatureFlagStorage(userDefaults: UserDefaults.standard)) {
+	public init(container: Container) {
 		self.container = container
-        self.storage = storage
 		self.userDataFuture = Future<AdditionalUserData, Error> { (promise) in
 			container.fetchUserRecordID { (recordID, error) in
 				guard let recordID = recordID else {
