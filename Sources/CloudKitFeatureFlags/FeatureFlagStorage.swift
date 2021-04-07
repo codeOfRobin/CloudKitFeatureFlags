@@ -9,7 +9,7 @@ import Foundation
 
 public protocol FeatureFlagStorage: AnyObject {
     func set(name: String, value: Bool)
-    func get(name: String) -> Bool?
+    func get(name: String) -> Bool
 }
 
 public class UserDefaultsFeatureFlagStorage: FeatureFlagStorage {
@@ -25,8 +25,8 @@ public class UserDefaultsFeatureFlagStorage: FeatureFlagStorage {
         userDefaults.setValue(value, forKey: name)
     }
     
-    public func get(name: String) -> Bool? {
-        return userDefaults.object(forKey: name) as? Bool
+    public func get(name: String) -> Bool {
+        userDefaults.bool(forKey: name)
     }
     
 }
